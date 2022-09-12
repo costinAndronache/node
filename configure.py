@@ -45,7 +45,7 @@ from utils import SearchFiles
 parser = argparse.ArgumentParser()
 
 valid_os = ('win', 'mac', 'solaris', 'freebsd', 'openbsd', 'linux',
-            'android', 'aix', 'cloudabi')
+            'android', 'aix', 'cloudabi', 'ios')
 valid_arch = ('arm', 'arm64', 'ia32', 'mips', 'mipsel', 'mips64el', 'ppc',
               'ppc64', 'x64', 'x86', 'x86_64', 's390x', 'riscv64', 'loong64')
 valid_arm_float_abi = ('soft', 'softfp', 'hard')
@@ -58,6 +58,12 @@ with open ('tools/icu/icu_versions.json') as f:
   icu_versions = json.load(f)
 
 # create option groups
+parser.add_argument('--v8-disable-webassembly',
+    action='store_true',
+    dest='v8_disable_webassembly',
+    default=False,
+    help='compile V8 without WebAssembly support')
+
 shared_optgroup = parser.add_argument_group("Shared libraries",
     "Flags that allows you to control whether you want to build against "
     "built-in dependencies or its shared representations. If necessary, "
@@ -1186,6 +1192,8 @@ def configure_node_lib_files(o):
 def configure_node(o):
   if options.dest_os == 'android':
     o['variables']['OS'] = 'android'
+  if options.dest_os == 'ios':
+    o['variables']['OS'] = 'ios'
   o['variables']['node_prefix'] = options.prefix
   o['variables']['node_install_npm'] = b(not options.without_npm)
   o['variables']['node_install_corepack'] = b(not options.without_corepack)
@@ -1411,7 +1419,7 @@ def configure_library(lib, output, pkgname=None):
 
 
 def configure_v8(o):
-  o['variables']['v8_enable_webassembly'] = 1
+  o['variables']['v8_enable_webassembly'] = 0 if options.v8_disable_webassembly else 1
   o['variables']['v8_enable_javascript_promise_hooks'] = 1
   o['variables']['v8_enable_lite_mode'] = 1 if options.v8_lite_mode else 0
   o['variables']['v8_enable_gdbjit'] = 1 if options.gdb else 0

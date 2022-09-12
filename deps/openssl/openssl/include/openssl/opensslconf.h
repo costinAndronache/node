@@ -14,4 +14,12 @@
 # include <openssl/configuration.h>
 # include <openssl/macros.h>
 
+/* iOS app store won't allow getcontext, setcontext, makecontext */
+#if defined(__APPLE__) && defined(__MACH__)
+#include <TargetConditionals.h>
+#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+#define OPENSSL_NO_ASYNC
+#endif
+#endif
+
 #endif  /* OPENSSL_OPENSSLCONF_H */

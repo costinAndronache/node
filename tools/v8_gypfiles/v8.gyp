@@ -612,13 +612,13 @@
               }],
               ['v8_enable_webassembly==1', {
                 'conditions': [
-                  ['OS=="mac" or (_toolset=="host" and host_arch=="x64" and OS=="linux")', {
+                  ['OS=="mac" or OS=="ios" or (_toolset=="host" and host_arch=="x64" and OS=="linux")', {
                     'sources': [
                       '<(V8_ROOT)/src/trap-handler/handler-inside-posix.h',
                     ],
                   }],
                   # TODO(targos): Replace False with OS=="win" if handler-outside-simulator.cc becomes compatible with MSVC.
-                  ['_toolset=="host" and host_arch=="x64" and (OS=="linux" or OS=="mac" or False)', {
+                  ['_toolset=="host" and host_arch=="x64" and (OS=="linux" or OS=="mac" or OS=="ios" or False)', {
                     'sources': [
                       '<(V8_ROOT)/src/trap-handler/trap-handler-simulator.h',
                     ],
@@ -1149,7 +1149,6 @@
           'sources': [
             '<(V8_ROOT)/src/base/debug/stack_trace_posix.cc',
             '<(V8_ROOT)/src/base/platform/platform-darwin.cc',
-            '<(V8_ROOT)/src/base/platform/platform-macos.cc',
           ]
         }],
         ['is_win', {
