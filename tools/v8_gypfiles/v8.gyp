@@ -847,7 +847,7 @@
           'conditions': [
             ['v8_enable_webassembly==1', {
               'conditions': [
-                ['OS=="mac" or (_toolset=="host" and host_arch=="x64" and OS=="linux")', {
+                ['OS in ("mac", "ios") or (_toolset=="host" and host_arch=="x64" and OS=="linux")', {
                   'sources': [
                     '<(V8_ROOT)/src/trap-handler/handler-inside-posix.cc',
                     '<(V8_ROOT)/src/trap-handler/handler-outside-posix.cc',
@@ -865,6 +865,11 @@
                   'sources': [
                     '<(V8_ROOT)/src/trap-handler/handler-outside-simulator.cc',
                   ],
+                }],
+              ],
+              'target_conditions': [
+                ['OS=="ios" and _toolset=="host"', {
+                  'sources': ['<(V8_ROOT)/src/trap-handler/handler-outside-simulator.cc'],
                 }],
               ],
             }],
@@ -1148,8 +1153,7 @@
         ['OS == "mac" or OS == "ios"', {
           'sources': [
             '<(V8_ROOT)/src/base/debug/stack_trace_posix.cc',
-            '<(V8_ROOT)/src/base/platform/platform-darwin.cc',
-            '<(V8_ROOT)/src/base/platform/platform-macos.cc',
+            '<(V8_ROOT)/src/base/platform/platform-darwin.cc'
           ]
         }],
         ['is_win', {

@@ -124,9 +124,11 @@ tools/*/*.i.tmp
 /coverage
 
 # === Rules for Xcode artifacts ===
-*.xcodeproj
+#*.xcodeproj
 *.xcworkspace
-*.pbxproj
+#*.pbxproj
+*xcschememanagement.plist
+
 
 # === Rules for files in `/deps` ===
 # Exclude all files in the vendored `npm`.
@@ -154,6 +156,10 @@ cmake_install.cmake
 install_manifest.txt
 *.cbp
 
+# === Rules for iOS framework ===
+tools/ios-framework/bin
+out_ios
+
 # === Global Rules ===
 # Keep last to avoid being excluded
 *.pyc
@@ -163,3 +169,4 @@ __pycache__
 
 # === Rules for C++ development ===
 compile_commands.json
+

@@ -39,6 +39,11 @@
 #include <unistd.h>  // sysconf()
 #endif
 
+#if V8_OS_MACOSX
+#include <sys/sysctl.h>
+#include <mach/machine.h>
+#endif
+
 #include <ctype.h>
 #include <limits.h>
 #include <stdio.h>
@@ -785,9 +790,6 @@ CPU::CPU()
     has_jscvt_ = HasListItem(features, "jscvt");
     delete[] features;
   }
-#elif V8_OS_DARWIN
-  // ARM64 Macs always have JSCVT.
-  has_jscvt_ = true;
 #endif  // V8_OS_WIN
 
 #elif V8_HOST_ARCH_PPC || V8_HOST_ARCH_PPC64

@@ -216,6 +216,11 @@
         'NODE_PLATFORM="darwin"',
       ],
     }],
+    [ 'OS=="ios"', {
+      # linking Corefoundation is needed since certain OSX debugging tools
+      # like Instruments require it for some features
+      'libraries': [ '-framework CoreFoundation' ],
+    }],
     [ 'OS=="freebsd"', {
       'libraries': [
         '-lutil',
@@ -294,7 +299,7 @@
         ],
       },
     }],
-    [ 'coverage=="true" and node_shared=="false" and OS in "mac freebsd linux"', {
+    [ 'coverage=="true" and node_shared=="false" and OS in "mac ios freebsd linux"', {
       'cflags!': [ '-O3' ],
       'ldflags': [ '--coverage',
                    '-g',

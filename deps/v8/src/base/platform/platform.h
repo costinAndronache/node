@@ -317,11 +317,7 @@ class V8_BASE_EXPORT OS {
   // Whether the platform supports mapping a given address in another location
   // in the address space.
   V8_WARN_UNUSED_RESULT static constexpr bool IsRemapPageSupported() {
-#ifdef V8_OS_MACOS
-    return true;
-#else
     return false;
-#endif
   }
 
   // Remaps already-mapped memory at |new_address| with |access| permissions.

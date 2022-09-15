@@ -437,9 +437,19 @@ void OS::Free(void* address, size_t size) {
   CHECK_EQ(0, munmap(address, size));
 }
 
-// macOS specific implementation in platform-macos.cc.
-#if !defined(V8_OS_MACOS)
+
 // static
+
+// Convert between a shared memory handle and a file descriptor.
+inline PlatformSharedMemoryHandle SharedMemoryHandleFromFileDescriptor(int fd) {
+  return static_cast<PlatformSharedMemoryHandle>(fd);
+}
+
+inline int FileDescriptorFromSharedMemoryHandle(
+    PlatformSharedMemoryHandle handle) {
+  return static_cast<int>(handle);
+}
+
 void* OS::AllocateShared(void* hint, size_t size, MemoryPermission access,
                          PlatformSharedMemoryHandle handle, uint64_t offset) {
   DCHECK_EQ(0, size % AllocatePageSize());
@@ -449,7 +459,6 @@ void* OS::AllocateShared(void* hint, size_t size, MemoryPermission access,
   if (result == MAP_FAILED) return nullptr;
   return result;
 }
-#endif  // !defined(V8_OS_MACOS)
 
 // static
 void OS::FreeShared(void* address, size_t size) {
@@ -575,8 +584,7 @@ void OS::FreeAddressSpaceReservation(AddressSpaceReservation reservation) {
   Free(reservation.base(), reservation.size());
 }
 
-// macOS specific implementation in platform-macos.cc.
-#if !defined(V8_OS_MACOS)
+
 // static
 // Need to disable CFI_ICALL due to the indirect call to memfd_create.
 DISABLE_CFI_ICALL
@@ -590,7 +598,6 @@ void OS::DestroySharedMemoryHandle(PlatformSharedMemoryHandle handle) {
   int fd = FileDescriptorFromSharedMemoryHandle(handle);
   CHECK_EQ(0, close(fd));
 }
-#endif  // !defined(V8_OS_MACOS)
 
 // static
 bool OS::HasLazyCommits() {
@@ -946,8 +953,6 @@ bool AddressSpaceReservation::Free(void* address, size_t size) {
   return OS::DecommitPages(address, size);
 }
 
-// macOS specific implementation in platform-macos.cc.
-#if !defined(V8_OS_MACOS)
 bool AddressSpaceReservation::AllocateShared(void* address, size_t size,
                                              OS::MemoryPermission access,
                                              PlatformSharedMemoryHandle handle,
@@ -958,7 +963,6 @@ bool AddressSpaceReservation::AllocateShared(void* address, size_t size,
   return mmap(address, size, prot, MAP_SHARED | MAP_FIXED, fd, offset) !=
          MAP_FAILED;
 }
-#endif  // !defined(V8_OS_MACOS)
 
 bool AddressSpaceReservation::FreeShared(void* address, size_t size) {
   DCHECK(Contains(address, size));

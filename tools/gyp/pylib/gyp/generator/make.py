@@ -65,8 +65,8 @@ generator_filelist_paths = None
 def CalculateVariables(default_variables, params):
     """Calculate additional variables for use in the build (called by gyp)."""
     flavor = gyp.common.GetFlavor(params)
-    if flavor == "mac":
-        default_variables.setdefault("OS", "mac")
+    if flavor in ("mac", "ios"):
+        default_variables.setdefault("OS", flavor)
         default_variables.setdefault("SHARED_LIB_SUFFIX", ".dylib")
         default_variables.setdefault(
             "SHARED_LIB_DIR", generator_default_variables["PRODUCT_DIR"]
@@ -829,7 +829,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
         self.toolset = spec["toolset"]
 
         self.is_mac_bundle = gyp.xcode_emulation.IsMacBundle(self.flavor, spec)
-        if self.flavor == "mac":
+        if self.flavor in ("mac", "ios"):
             self.xcode_settings = gyp.xcode_emulation.XcodeSettings(spec)
         else:
             self.xcode_settings = None
@@ -1024,7 +1024,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
 
             # Write the actual command.
             action_commands = action["action"]
-            if self.flavor == "mac":
+            if self.flavor in ("mac", "ios"):
                 action_commands = [
                     gyp.xcode_emulation.ExpandEnvVars(command, env)
                     for command in action_commands
@@ -1208,7 +1208,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
                 # action, cd_action, and mkdirs get written to a toplevel variable
                 # called cmd_foo. Toplevel variables can't handle things that change
                 # per makefile like $(TARGET), so hardcode the target.
-                if self.flavor == "mac":
+                if self.flavor in ("mac", "ios"):
                     action = [
                         gyp.xcode_emulation.ExpandEnvVars(command, env)
                         for command in action
@@ -1381,7 +1381,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
                 quoter=EscapeCppDefine,
             )
 
-            if self.flavor == "mac":
+            if self.flavor in ("mac", "ios"):
                 cflags = self.xcode_settings.GetCflags(
                     configname, arch=config.get("xcode_configuration_platform")
                 )
@@ -1400,7 +1400,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
             self.WriteList(cflags_c, "CFLAGS_C_%s" % configname)
             self.WriteLn("# Flags passed to only C++ files.")
             self.WriteList(cflags_cc, "CFLAGS_CC_%s" % configname)
-            if self.flavor == "mac":
+            if self.flavor in ("mac", "ios"):
                 self.WriteLn("# Flags passed to only ObjC files.")
                 self.WriteList(cflags_objc, "CFLAGS_OBJC_%s" % configname)
                 self.WriteLn("# Flags passed to only ObjC++ files.")
@@ -1471,7 +1471,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
                 "%s " % precompiled_header.GetInclude("cc") + "$(CFLAGS_$(BUILDTYPE)) "
                 "$(CFLAGS_CC_$(BUILDTYPE))"
             )
-            if self.flavor == "mac":
+            if self.flavor in ("mac", "ios"):
                 self.WriteLn(
                     "$(OBJS): GYP_OBJCFLAGS := "
                     "$(DEFS_$(BUILDTYPE)) "
@@ -1538,7 +1538,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
         """
         assert not self.is_mac_bundle
 
-        if self.flavor == "mac" and self.type in (
+        if self.flavor in ("mac", "ios") and self.type in (
             "static_library",
             "executable",
             "shared_library",
@@ -1586,7 +1586,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
     def _InstallImmediately(self):
         return (
             self.toolset == "target"
-            and self.flavor == "mac"
+            and self.flavor in ("mac", "ios")
             and self.type
             in ("static_library", "executable", "shared_library", "loadable_module")
         )
@@ -1684,7 +1684,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
         if self.type != "none":
             for configname in sorted(configs.keys()):
                 config = configs[configname]
-                if self.flavor == "mac":
+                if self.flavor in ("mac", "ios"):
                     ldflags = self.xcode_settings.GetLdflags(
                         configname,
                         generator_default_variables["PRODUCT_DIR"],
@@ -1718,7 +1718,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
                 library_dirs = config.get("library_dirs", [])
                 ldflags += [("-L%s" % library_dir) for library_dir in library_dirs]
                 self.WriteList(ldflags, "LDFLAGS_%s" % configname)
-                if self.flavor == "mac":
+                if self.flavor in ("mac", "ios"):
                     self.WriteList(
                         self.xcode_settings.GetLibtoolflags(configname),
                         "LIBTOOLFLAGS_%s" % configname,
@@ -1727,7 +1727,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
             if libraries:
                 # Remove duplicate entries
                 libraries = gyp.common.uniquer(libraries)
-                if self.flavor == "mac":
+                if self.flavor in ("mac", "ios"):
                     libraries = self.xcode_settings.AdjustLibraries(libraries)
             self.WriteList(libraries, "LIBS")
             self.WriteLn(
@@ -1736,7 +1736,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
             )
             self.WriteLn("%s: LIBS := $(LIBS)" % QuoteSpaces(self.output_binary))
 
-            if self.flavor == "mac":
+            if self.flavor in ("mac", "ios"):
                 self.WriteLn(
                     "%s: GYP_LIBTOOLFLAGS := $(LIBTOOLFLAGS_$(BUILDTYPE))"
                     % QuoteSpaces(self.output_binary)
@@ -1745,7 +1745,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
         # Postbuild actions. Like actions, but implicitly depend on the target's
         # output.
         postbuilds = []
-        if self.flavor == "mac":
+        if self.flavor in ("mac", "ios"):
             if target_postbuilds:
                 postbuilds.append("$(TARGET_POSTBUILDS_$(BUILDTYPE))")
             postbuilds.extend(gyp.xcode_emulation.GetSpecPostbuildCommands(spec))
@@ -1855,7 +1855,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
                     "Spaces in alink input filenames not supported (%s)" % link_dep
                 )
             if (
-                self.flavor not in ("mac", "openbsd", "netbsd", "win")
+                self.flavor not in ("mac", "ios", "openbsd", "netbsd", "win")
                 and not self.is_standalone_static_library
             ):
                 if self.flavor in ('linux', 'android'):
@@ -1968,7 +1968,7 @@ $(obj).$(TOOLSET)/$(TARGET)/%%.o: $(obj)/%%%s FORCE_DO_CMD
             if self.flavor != "zos":
                 installable_deps.append(self.output)
             if (
-                self.flavor == "mac"
+                self.flavor in ("mac", "ios")
                 and "product_dir" not in spec
                 and self.toolset == "target"
             ):
@@ -2441,7 +2441,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
         "CXX.host": GetEnvironFallback(("CXX_host", "CXX"), "g++"),
         "LINK.host": GetEnvironFallback(("LINK_host", "LINK"), "$(CXX.host)"),
     }
-    if flavor == "mac":
+    if flavor in ("mac", "ios"):
         flock_command = "./gyp-mac-tool flock"
         header_params.update(
             {
@@ -2599,7 +2599,7 @@ def GenerateOutput(target_list, target_dicts, data, params):
         spec = target_dicts[qualified_target]
         configs = spec["configurations"]
 
-        if flavor == "mac":
+        if flavor in ("mac", "ios"):
             gyp.xcode_emulation.MergeGlobalXcodeSettingsToSpec(data[build_file], spec)
 
         writer = MakefileWriter(generator_flags, flavor)

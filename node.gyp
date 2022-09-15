@@ -226,7 +226,7 @@
             },
           },
           'conditions': [
-            ['OS != "aix" and OS != "mac"', {
+            ['OS != "aix" and OS != "mac" and OS != "ios"', {
               'ldflags': [
                 '-Wl,--whole-archive',
                 '<(obj_dir)/<(STATIC_LIB_PREFIX)<(node_core_target_name)<(STATIC_LIB_SUFFIX)',
@@ -798,7 +798,7 @@
             'src/node_crypto.h'
           ],
         }],
-        [ 'OS in "linux freebsd mac solaris" and '
+        [ 'OS in "linux freebsd solaris" and '
           'target_arch=="x64" and '
           'node_target_type=="executable"', {
           'defines': [ 'NODE_ENABLE_LARGE_CODE_PAGES=1' ],

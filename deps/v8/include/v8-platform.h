@@ -553,14 +553,6 @@ inline void* FileMappingFromSharedMemoryHandle(
   return reinterpret_cast<void*>(handle);
 }
 #else
-// Convert between a shared memory handle and a file descriptor.
-inline PlatformSharedMemoryHandle SharedMemoryHandleFromFileDescriptor(int fd) {
-  return static_cast<PlatformSharedMemoryHandle>(fd);
-}
-inline int FileDescriptorFromSharedMemoryHandle(
-    PlatformSharedMemoryHandle handle) {
-  return static_cast<int>(handle);
-}
 #endif
 
 /**
